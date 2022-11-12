@@ -1,0 +1,47 @@
+version: '3.9'
+
+services:
+  db:
+    image: mysql:5.7
+    restart: always
+    env_file:
+      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - ${MYSQL_LOCAL_PORT}:${MYSQL_DOCKER_PORT}
+    volumes:
+      - ./db:/var/lib/mysql
+    networks:
+      - backend
+  app:
+    depends_on:
+      - db
+    build: ./src
+    restart: always
+    ports:
+      - ${APP_LOCAL_PORT}:${APP_DOCKER_PORT}
+    volumes:
+      - ./src:/app
+    networks:
+      - backend
+    env_file:
+      - .env
+    environment:
+      MYSQL_HOST: ${MYSQL_HOST}
+      MYSQL_LOCAL_PORT: ${MYSQL_LOCAL_PORT}
+      MYSQL_DOCKER_PORT: ${MYSQL_DOCKER_PORT}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      APP_DOCKER_PORT: ${APP_DOCKER_PORT}
+      APP_LOCAL_PORT: ${APP_LOCAL_PORT}
+networks:
+  backend:
+    driver: bridge
+volumes:
+  db:
+    driver: local
